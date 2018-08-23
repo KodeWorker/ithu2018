@@ -6,7 +6,7 @@ from math import sqrt
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import Lasso
 
 def root_mean_squared_error(y_ture, y_pred):
     return sqrt(mean_squared_error(y_ture, y_pred))
@@ -51,9 +51,9 @@ if __name__ == '__main__':
         scaler = StandardScaler()
         X_train = scaler.fit_transform(X_train)
         X_test = scaler.transform(X_test)
-        rf = RandomForestRegressor(n_estimators=1000, random_state=RANDOM_STATE)
-        rf.fit(X_train, y_train)
-        y_pred = rf.predict(X_test)
+        lasso = Lasso(alpha=1.0)
+        lasso.fit(X_train, y_train)
+        y_pred = lasso.predict(X_test)
         
         fold_rmse.append(root_mean_squared_error(y_test, y_pred))
 #        break # temp

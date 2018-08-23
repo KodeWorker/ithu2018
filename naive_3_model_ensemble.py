@@ -6,7 +6,9 @@ from math import sqrt
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import Lasso
 
 def root_mean_squared_error(y_ture, y_pred):
     return sqrt(mean_squared_error(y_ture, y_pred))
@@ -45,17 +47,36 @@ if __name__ == '__main__':
     
     fold_rmse = []
     kf = KFold(n_splits=n_splits, random_state=RANDOM_STATE)
-    for train, test in kf.split(Xf):
-        X_train, X_test, y_train, y_test = Xf[train], Xf[test], y[train], y[test]
+    for train, val in kf.split(Xf):
+        X_train, X_val, y_train, y_val = Xf[train], Xf[val], y[train], y[val]
         
         scaler = StandardScaler()
         X_train = scaler.fit_transform(X_train)
-        X_test = scaler.transform(X_test)
+        X_val = scaler.transform(X_val)
+        
+        # Support Vector Regression
+        svr = SVR(C=1.0, epsilon=1e-5)
+        svr.fit(X_train, y_train)
+        y_svr = svr.predict(X_val)
+        loss_svr = root_mean_squared_error(y_val, y_svr)
+        # Random Forests
         rf = RandomForestRegressor(n_estimators=1000, random_state=RANDOM_STATE)
         rf.fit(X_train, y_train)
-        y_pred = rf.predict(X_test)
+        y_rf = rf.predict(X_val)
+        loss_rf = root_mean_squared_error(y_val, y_rf)
+        # Lasso Regression
+        lasso = Lasso(alpha=1.0)
+        lasso.fit(X_train, y_train)
+        y_lasso = lasso.predict(X_val)
+        loss_lasso = root_mean_squared_error(y_val, y_lasso)
         
-        fold_rmse.append(root_mean_squared_error(y_test, y_pred))
+        total_model_loss = loss_svr + loss_rf + loss_lasso
+        w_svr = total_model_loss/loss_svr
+        w_rf = total_model_loss/loss_rf
+        w_lasso = total_model_loss/loss_lasso
+        y_pred = y_svr*(w_svr/(w_svr+w_rf+w_lasso)) + y_rf*(w_rf/(w_svr+w_rf+w_lasso)) + y_lasso*(w_lasso/(w_svr+w_rf+w_lasso))
+        
+        fold_rmse.append(root_mean_squared_error(y_val, y_pred))
 #        break # temp
     mean_rmse = np.mean(fold_rmse)
     

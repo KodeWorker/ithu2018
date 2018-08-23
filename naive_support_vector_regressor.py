@@ -56,7 +56,7 @@ if __name__ == '__main__':
         y_pred = svr.predict(X_test)
         
         fold_rmse.append(root_mean_squared_error(y_test, y_pred))
-        break # temp
+#        break # temp
     mean_rmse = np.mean(fold_rmse)
     
     print('RMSE: {:.4f}'.format(mean_rmse))
