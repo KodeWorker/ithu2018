@@ -10,6 +10,8 @@ from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Lasso
 
+import matplotlib.pyplot as plt
+
 def root_mean_squared_error(y_ture, y_pred):
     return sqrt(mean_squared_error(y_ture, y_pred))
 
@@ -47,6 +49,8 @@ if __name__ == '__main__':
     
     fold_rmse = []
     kf = KFold(n_splits=n_splits, random_state=RANDOM_STATE)
+    fold_y_hat = []
+    fold_y_val = []    
     for train, val in kf.split(Xf):
         X_train, X_val, y_train, y_val = Xf[train], Xf[val], y[train], y[val]
         
@@ -77,7 +81,18 @@ if __name__ == '__main__':
         y_pred = y_svr*(w_svr/(w_svr+w_rf+w_lasso)) + y_rf*(w_rf/(w_svr+w_rf+w_lasso)) + y_lasso*(w_lasso/(w_svr+w_rf+w_lasso))
         
         fold_rmse.append(root_mean_squared_error(y_val, y_pred))
+        
+        fold_y_hat.append(y_pred)
+        fold_y_val.append(y_val)
 #        break # temp
     mean_rmse = np.mean(fold_rmse)
+    
+    fold_y_hat = np.array(fold_y_hat).flatten()
+    fold_y_val = np.array(fold_y_val).flatten()
+    plt.figure()
+    plt.plot(fold_y_val, 'red', label='y_val')
+    plt.plot(fold_y_hat, 'blue', label='y_hat')
+    plt.legend()
+    
     
     print('RMSE: {:.4f}'.format(mean_rmse))

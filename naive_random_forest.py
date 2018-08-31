@@ -11,6 +11,8 @@ from sklearn.ensemble import RandomForestRegressor
 def root_mean_squared_error(y_ture, y_pred):
     return sqrt(mean_squared_error(y_ture, y_pred))
 
+import matplotlib.pyplot as plt
+
 if __name__ == '__main__':
     
     # Step I: Read Data
@@ -45,18 +47,30 @@ if __name__ == '__main__':
     
     fold_rmse = []
     kf = KFold(n_splits=n_splits, random_state=RANDOM_STATE)
-    for train, test in kf.split(Xf):
-        X_train, X_test, y_train, y_test = Xf[train], Xf[test], y[train], y[test]
+    fold_y_hat = []
+    fold_y_val = []
+    for train, val in kf.split(Xf):
+        X_train, X_val, y_train, y_val = Xf[train], Xf[val], y[train], y[val]
         
         scaler = StandardScaler()
         X_train = scaler.fit_transform(X_train)
-        X_test = scaler.transform(X_test)
-        rf = RandomForestRegressor(n_estimators=1000, random_state=RANDOM_STATE)
+        X_val = scaler.transform(X_val)
+        rf = RandomForestRegressor(n_estimators=1000, max_depth=10, random_state=RANDOM_STATE)
         rf.fit(X_train, y_train)
-        y_pred = rf.predict(X_test)
+        y_pred = rf.predict(X_val)
         
-        fold_rmse.append(root_mean_squared_error(y_test, y_pred))
+        fold_rmse.append(root_mean_squared_error(y_val, y_pred))
 #        break # temp
+#        fold_y_hat.append(y_pred)
+#        fold_y_val.append(y_val)
+#        
     mean_rmse = np.mean(fold_rmse)
+#    
+#    fold_y_hat = np.array(fold_y_hat).flatten()
+#    fold_y_val = np.array(fold_y_val).flatten()
+#    plt.figure()
+#    plt.plot(fold_y_val, 'red', label='y_val')
+#    plt.plot(fold_y_hat, 'blue', label='y_hat')
+#    plt.legend()
     
     print('RMSE: {:.4f}'.format(mean_rmse))
