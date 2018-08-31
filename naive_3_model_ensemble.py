@@ -94,5 +94,4 @@ if __name__ == '__main__':
     plt.plot(fold_y_hat, 'blue', label='y_hat')
     plt.legend()
     
-    
     print('RMSE: {:.4f}'.format(mean_rmse))
