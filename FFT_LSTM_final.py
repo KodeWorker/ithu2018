@@ -53,8 +53,34 @@ if __name__ == '__main__':
     X = np.array(X)
     y = np.array(y)
     
-    print('\nDone!')
     
+    X_train = []
+    for i in range(len(X)):
+        print('\rProgress: {:.2f}%'.format((i+1)/len(X)*100), end='\r')
+        
+        Xt = np.array([])
+        for j in range(n_features):
+            Xtemp = X[i, :, j]
+            Xfseg = np.array([])
+            for k in range(int(n_timesteps/1500)):
+                if len(Xfseg) == 0:
+                    Xfseg = Xtemp[k*1500:(k+1)*1500]
+                else:
+                    Xfseg = np.vstack((Xfseg, Xtemp[k*1500:(k+1)*1500]))
+            
+            if len(Xt) == 0:
+                Xt = np.array([np.max(np.absolute(np.fft.fft(Xfseg[0,:]))),
+                                      np.max(np.absolute(np.fft.fft(Xfseg[3,:]))),
+                                      np.max(np.absolute(np.fft.fft(Xfseg[4,:])))])
+            else:
+                Xt = np.vstack((Xt, np.array([np.max(np.absolute(np.fft.fft(Xfseg[0,:]))),
+                                      np.max(np.absolute(np.fft.fft(Xfseg[3,:]))),
+                                      np.max(np.absolute(np.fft.fft(Xfseg[4,:])))])))
+        X_train.append(Xt)
+    X_train = np.array(X_train)
+            
+    print('\nDone!')
+        
     # Step II: Test Data
     data_dir = os.path.join(os.path.dirname(__file__), 'sample_data', '831測驗集')
     train_filename_list = os.listdir(data_dir)
@@ -71,8 +97,33 @@ if __name__ == '__main__':
         X_.append(feature)
     
     X_ = np.array(X_)
-    print('\nDone!')
     
+    X_test = []
+    for i in range(len(X_)):
+        print('\rProgress: {:.2f}%'.format((i+1)/len(X_)*100), end='\r')
+        
+        Xt = np.array([])
+        for j in range(n_features):
+            Xtemp = X_[i, :, j]
+            Xfseg = np.array([])
+            for k in range(int(n_timesteps/1500)):
+                if len(Xfseg) == 0:
+                    Xfseg = Xtemp[k*1500:(k+1)*1500]
+                else:
+                    Xfseg = np.vstack((Xfseg, Xtemp[k*1500:(k+1)*1500]))
+            
+            if len(Xt) == 0:
+                Xt = np.array([np.max(np.absolute(np.fft.fft(Xfseg[0,:]))),
+                                      np.max(np.absolute(np.fft.fft(Xfseg[3,:]))),
+                                      np.max(np.absolute(np.fft.fft(Xfseg[4,:])))])
+            else:
+                Xt = np.vstack((Xt, np.array([np.max(np.absolute(np.fft.fft(Xfseg[0,:]))),
+                                      np.max(np.absolute(np.fft.fft(Xfseg[3,:]))),
+                                      np.max(np.absolute(np.fft.fft(Xfseg[4,:])))])))
+        X_test.append(Xt)
+    X_test = np.array(X_test)
+    print('\nDone!')
+#    
     n_splits = 5
     RANDOM_STATE = 777
     n_epochs = 100
